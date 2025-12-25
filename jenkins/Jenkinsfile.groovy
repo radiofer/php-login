@@ -9,7 +9,7 @@ node {
       }
       stage('Test') {
         sh "docker compose -p ${JOB_BASE_NAME} -f docker/docker-compose.yml up -d"
-        sleep 20
+        sleep 30
         sh "docker compose -p ${JOB_BASE_NAME} -f docker/docker-compose.yml exec -T mysql mariadb -u root -p'Abc123!' php < db/dump.sql"
         containerID = sh(returnStdout: true, script: "docker compose -p ${JOB_BASE_NAME} -f docker/docker-compose.yml ps -q app").trim()
         ip = sh(returnStdout: true, script: "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${containerID}").trim()
@@ -24,21 +24,21 @@ node {
           if(!output.contains('Bem Vindo!'))
             error('Login falhou!')
         }     
-
       }
       stage('Save') {
+       withDockerRegistry(credentialsId: 'docker-registry', url: 'https://index.docker.io/v1/') {
+        docker.image(img).push()
+       }
       }
+      stage('Deploy') {
+      } 
     }
-    stage('Deploy') {
-    
-    
-    } 
   } catch (ex) {
-    throw ex
-  } finally {
-    docker.withServer('172.27.11.100:2375') {
-      sh "docker compose -p ${JOB_BASE_NAME} -f docker/docker-compose.yml down -v"
-    }
+      throw ex
+    } finally {
+      docker.withServer('172.27.11.100:2375') {
+        sh "docker compose -p ${JOB_BASE_NAME} -f docker/docker-compose.yml down -v"
+      }
   }
   
 }
