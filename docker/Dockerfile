@@ -13,4 +13,4 @@ RUN apk add --no-cache php-cli php-mysqli php-session php7-pecl-memcached && mkd
 COPY . /app
 
 WORKDIR /app
-ENTRYPOINT ["sh", "-c", "php -c $PHP_INI -S 0.0.0.0:8080 -t /app"]
+ENTRYPOINT ["sh", "-c", "php -c $PHP_INI -S 0.0.0.0:80 -t /app"]
