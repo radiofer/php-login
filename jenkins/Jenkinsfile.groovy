@@ -4,7 +4,7 @@ node {
     stage('Build') {
       git branch: 'dev', credentialsId: 'radiofer', url:'git@github.com:radiofer/php-login.git'
       sh "rm -rf .git*"
-      docker.build(img, '-f docker/Dockerfile .')
+      docker.build(img, '--no-cache', '-f docker/Dockerfile .')
     }
     stage('Save') {
     }

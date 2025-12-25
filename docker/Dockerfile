@@ -8,7 +8,7 @@ ENV DB_USER=''
 ENV DB_NAME=''
 ENV DB_PASS=''
 
-RUN apk add --no-cache php81-cli php81-mysqli php81-session php81-perl-memcached && mkdir /app
+RUN apk add --no-cache php-cli php-mysqli php-session php7-perl-memcached && mkdir /app
 
 COPY . /app
 
