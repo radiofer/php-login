@@ -19,7 +19,6 @@ node {
     println "Utilizando servidor 172.27.11.${server}"
     docker.withServer("172.27.11.${server}:2375") {
       stage('Build') {
-        git branch: 'dev', credentialsId: 'radiofer', url:'git@github.com:radiofer/php-login.git'
         sh "rm -rf .git*"
         docker.build(img, '--no-cache -f docker/Dockerfile .')
       }
