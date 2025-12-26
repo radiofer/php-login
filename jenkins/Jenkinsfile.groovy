@@ -4,6 +4,7 @@ node {
   def img = 'radiofer/php-login'
   def parameters = [
     '--restart always',
+    '-p 8081:80',
     "--name ${JOB_BASE_NAME}",
     "--network ${JOB_BASE_NAME}",
     '--ip 192.168.10.10',
@@ -30,7 +31,7 @@ node {
         ip = sh(returnStdout: true, script: "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${containerID}").trim()
         docker.image('alpine').withRun("-it --network ${JOB_BASE_NAME}_default") { alpine ->
           sh "docker exec ${alpine.id} apk add --no-cache curl"
-          sh "docker exec ${alpine.id} curl -sL ${ip}:80 > /dev/null"
+          sh "docker exec ${alpine.id} curl -sL ${ip} > /dev/null"
           def output = sh(returnStdout: true, script: """
             docker exec ${alpine.id} curl -sL --cookie-jar cookie \
             -d 'username=victor@frankenstein.co.uk&pass=123' \
