@@ -30,7 +30,7 @@ node {
         ip = sh(returnStdout: true, script: "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${containerID}").trim()
         docker.image('alpine').withRun("-it --network ${JOB_BASE_NAME}_default") { alpine ->
           sh "docker exec ${alpine.id} apk add --no-cache curl"
-          sh "docker exec ${alpine.id} curl -sL ${ip} > /dev/null"
+          sh "docker exec ${alpine.id} curl -sL ${ip}:80 > /dev/null"
           def output = sh(returnStdout: true, script: """
             docker exec ${alpine.id} curl -sL --cookie-jar cookie \
             -d 'username=victor@frankenstein.co.uk&pass=123' \
