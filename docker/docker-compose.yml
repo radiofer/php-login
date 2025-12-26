@@ -10,6 +10,9 @@ services:
        MYSQL_USER: php
        MYSQL_PASSWORD: 4linux
 
+   memcached:
+     image: memcached:alpine
+
    app:
      depends_on:
      - mysql
