@@ -1,7 +1,21 @@
 node {
+  def servers = [100, 200]
+  def server = servers[new Random().nextInt(servers.size())]
   def img = 'radiofer/php-login'
+  def parameters = [
+    '--restart always',
+    "--name ${JOB_BASE_NAME}",
+    "--network ${JOB_BASE_NAME}",
+    '--ip 192.168.10.10',
+    '-e DB_HOST=172.27.11.30',
+    '-e DB_PORT=3306',
+    '-e DB_NAME=infraagil',
+    '-e DB_USER=devops',
+    '-e DB_PASS=4linux'
+  ]
   try {
-    docker.withServer('172.27.11.100:2375') {
+    println "Utilizando servidor 172.27.11.${server}"
+    docker.withServer("172.27.11.${server}:2375") {
       stage('Build') {
         git branch: 'dev', credentialsId: 'radiofer', url:'git@github.com:radiofer/php-login.git'
         sh "rm -rf .git*"
@@ -21,8 +35,9 @@ node {
             -d 'username=victor@frankenstein.co.uk&pass=123' \
             http://${ip}/login.php
           """).trim()
-          if(!output.contains('Bem Vindo!'))
+          if(!output.contains('Bem Vindo!')) {
             error('Login falhou!')
+          }
         }     
       }
       stage('Save') {
@@ -30,13 +45,23 @@ node {
         docker.image(img).push()
        }
       }
-      stage('Deploy') {
+      stage('Deploy') { 
+        [100, 200].each {
+          docker.withServer("172.27.11.${it}:2375") {
+            withDockerRegistry(credentialsId: 'docker-registry', url: 'https://index.docker.io/v1/') {
+              docker.image(img).pull()
+          }
+          sh "docker network create --subnet 192.168.10.0/24 ${JOB_BASE_NAME} || /bin/true"
+          sh "docker rm -f ${JOB_BASE_NAME} || /bin/true"
+          docker.image(img).run(parameters.join(' '))
+        }
       } 
     }
+  }
   } catch (ex) {
       throw ex
     } finally {
-      docker.withServer('172.27.11.100:2375') {
+      docker.withServer("172.27.11.${server}:2375") {
         sh "docker compose -p ${JOB_BASE_NAME} -f docker/docker-compose.yml down -v"
       }
   }

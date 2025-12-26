@@ -14,6 +14,8 @@ services:
      depends_on:
      - mysql
      image: radiofer/php-login
+     ports:
+     - "8080:80"
      environment:
        DB_HOST: mysql
        DB_PORT: 3306
